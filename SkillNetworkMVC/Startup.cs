@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using AutoMapper;
 
 namespace SkillNetworkMVC
 {
@@ -31,6 +32,15 @@ namespace SkillNetworkMVC
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
 
+            var mapperConfig = new MapperConfiguration((v) =>
+            {
+                v.AddProfile(new MappingProfile());
+
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddScoped<IMapper>(provider => new Mapper(mapperConfig, provider.GetService));
+
             services
                 .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection))
                 .AddIdentity<User, IdentityRole>(opts => {
@@ -41,7 +51,6 @@ namespace SkillNetworkMVC
                     opts.Password.RequireDigit = false;
                 })
                     .AddEntityFrameworkStores<ApplicationDbContext>();
-           
 
             services.AddAuthorization();
             services.AddMvc();
