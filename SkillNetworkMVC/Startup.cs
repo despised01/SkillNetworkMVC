@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SkillNetworkMVC.Data;
 using SkillNetworkMVC.Models.Users;
+using SkillNetworkMVC.Data.UnitOfWork;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,8 +32,7 @@ namespace SkillNetworkMVC
             string connection = Configuration.GetConnectionString("DefaultConnection");
 
             services
-                .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
-            services
+                .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection))
                 .AddIdentity<User, IdentityRole>(opts => {
                     opts.Password.RequiredLength = 5;
                     opts.Password.RequireNonAlphanumeric = false;
@@ -41,10 +41,12 @@ namespace SkillNetworkMVC
                     opts.Password.RequireDigit = false;
                 })
                     .AddEntityFrameworkStores<ApplicationDbContext>();
+           
 
             services.AddAuthorization();
             services.AddMvc();
-            services.AddControllers();
+            services.AddControllersWithViews();
+            services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

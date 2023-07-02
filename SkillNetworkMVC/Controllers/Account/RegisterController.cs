@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SkillNetworkMVC.Models.Users;
 using SkillNetworkMVC.ViewModels.Account;
 using System.Threading.Tasks;
+using SkillNetworkMVC.Data.UnitOfWork;
 
 namespace SkillNetworkMVC.Controllers.Account
 {

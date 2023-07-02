@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SkillNetworkMVC.Models;
+using SkillNetworkMVC.ViewModels.Account;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,9 +19,11 @@ namespace SkillNetworkMVC.Controllers
             _logger = logger;
         }
 
+        [Route("")]
+        [Route("[controller]/[action]")]
         public IActionResult Index()
         {
-            return View();
+            return View(new MainViewModel());
         }
 
         public IActionResult Privacy()
