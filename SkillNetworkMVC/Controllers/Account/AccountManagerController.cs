@@ -20,12 +20,18 @@ namespace SkillNetworkMVC.Controllers.Account
             _signInManager = signInManager;
             _mapper = mapper;
         }
-
+        
         [Route("Login")]
         [HttpGet]
         public IActionResult Login()
         {
             return View("Home/Login");
+        }
+
+        [HttpGet]
+        public IActionResult Login(string returnUrl = null)
+        {
+            return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
         [Route("Login")]
@@ -35,11 +41,10 @@ namespace SkillNetworkMVC.Controllers.Account
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(model.Email);
 
-                var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, false);
+                var user = _mapper.Map<User>(model);
 
-
+                var result = await _signInManager.PasswordSignInAsync(user.Email, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
                     if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
@@ -56,7 +61,7 @@ namespace SkillNetworkMVC.Controllers.Account
                     ModelState.AddModelError("", "Неправильный логин и (или) пароль");
                 }
             }
-            return RedirectToAction("Index", "Home");
+            return View("Views/Home/Index.cshtml");
         }
 
         [Route("Logout")]
@@ -67,5 +72,6 @@ namespace SkillNetworkMVC.Controllers.Account
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
+
     }
 }
