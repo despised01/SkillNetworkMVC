@@ -2,6 +2,7 @@
 using SkillNetworkMVC.Data.Repositories;
 using System.Collections.Generic;
 using System;
+using SkillNetworkMVC.Data.Context;
 
 namespace SkillNetworkMVC.Data.UnitOfWork
 {
@@ -11,9 +12,9 @@ namespace SkillNetworkMVC.Data.UnitOfWork
 
         private Dictionary<Type, object> _repositories;
 
-        public UnitOfWork(ApplicationDbContext app)
+        public UnitOfWork(ApplicationDbContext applicationDbContext)
         {
-            this._appContext = app;
+            _appContext = applicationDbContext;
         }
 
         public void Dispose()
@@ -44,8 +45,8 @@ namespace SkillNetworkMVC.Data.UnitOfWork
             }
 
             return (IRepository<TEntity>)_repositories[type];
-
         }
+
         public int SaveChanges(bool ensureAutoHistory = false)
         {
             throw new NotImplementedException();

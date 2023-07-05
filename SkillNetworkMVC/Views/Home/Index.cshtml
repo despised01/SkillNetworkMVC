@@ -3,20 +3,17 @@
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager;
 
+@{
+    ViewData["Title"] = "Главная";
+}
 @model SkillNetworkMVC.ViewModels.Account.MainViewModel;
 
-@{
-    ViewData["Title"] = "Home Page";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
 @if (SignInManager.IsSignedIn(User))
 {
     <div>Hello @User.Identity!</div>
 }
 else
 {
-
-
     <div class="row">
         <div class="side">
             <div class="center">
@@ -25,12 +22,9 @@ else
             <img class="main-img" src="https://pngimg.com/uploads/hyena/hyena_PNG7.png" />
         </div>
 
-
         <div class="main">
-            <partial name="Login" model="Model.LoginView" />
-            <partial name="Register" model="Model.RegisterView" />
+            <partial name="Login" model="@Model.LoginView" />
+            <partial name="Register" model="@Model.RegisterView" />
         </div>
-
     </div>
-
 }

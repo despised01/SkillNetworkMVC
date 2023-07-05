@@ -25,6 +25,7 @@ namespace SkillNetworkMVC.ViewModels.Account
         [DataType(DataType.Date)]
         [Display(Name = "Дата рождения")]
         public DateTime BirthDate { get; set; }
+
         public string UserName => Email;
 
         [DataType(DataType.Text)]

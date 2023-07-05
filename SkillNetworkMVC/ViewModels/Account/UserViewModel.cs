@@ -1,4 +1,5 @@
 ﻿using SkillNetworkMVC.Models.Users;
+using System.Collections.Generic;
 
 namespace SkillNetworkMVC.ViewModels.Account
 {
@@ -10,5 +11,8 @@ namespace SkillNetworkMVC.ViewModels.Account
         {
             User = user;
         }
+
+        public List<User> Friends { get; set; }
+
     }
 }

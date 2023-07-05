@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SkillNetworkMVC.Models.Users;
 
 namespace SkillNetworkMVC.ViewModels.Account
 {

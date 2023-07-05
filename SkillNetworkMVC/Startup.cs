@@ -1,20 +1,18 @@
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SkillNetworkMVC.Data;
 using SkillNetworkMVC.Models.Users;
-using SkillNetworkMVC.Data.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using SkillNetworkMVC.Data.Repositories;
+using SkillNetworkMVC.Extentions;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using SkillNetworkMVC.Data.Context;
+using SkillNetworkMVC.Data.UnitOfWork;
 
 namespace SkillNetworkMVC
 {
@@ -27,52 +25,63 @@ namespace SkillNetworkMVC
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
             string connection = Configuration.GetConnectionString("DefaultConnection");
 
             var mapperConfig = new MapperConfiguration((v) =>
             {
                 v.AddProfile(new MappingProfile());
-
             });
 
             IMapper mapper = mapperConfig.CreateMapper();
-            services.AddScoped<IMapper>(provider => new Mapper(mapperConfig, provider.GetService));
+
+            services.AddSingleton(mapper);
+
 
             services
                 .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection))
-                .AddIdentity<User, IdentityRole>(opts => {
-                    opts.Password.RequiredLength = 5;
-                    opts.Password.RequireNonAlphanumeric = false;
-                    opts.Password.RequireLowercase = false;
-                    opts.Password.RequireUppercase = false;
-                    opts.Password.RequireDigit = false;
-                })
+                .AddCustomRepository<Friend, FriendsRepository>()
+                .AddCustomRepository<Message, MessageRepository>()
+                .AddTransient<IUnitOfWork, UnitOfWork>()
+                .AddIdentity<User, IdentityRole>(opts =>
+                 {
+                     opts.Password.RequiredLength = 5;
+                     opts.Password.RequireNonAlphanumeric = false;
+                     opts.Password.RequireLowercase = false;
+                     opts.Password.RequireUppercase = false;
+                     opts.Password.RequireDigit = false;
+                 })
                     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddAuthorization();
-            services.AddMvc();
             services.AddControllersWithViews();
             services.AddRazorPages();
+
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            var cachePeriod = "0";
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    ctx.Context.Response.Headers.Append("Cache-Control", $"public, max-age={cachePeriod}");
+                }
+            });
 
             app.UseRouting();
 
@@ -81,10 +90,12 @@ namespace SkillNetworkMVC
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
+                    endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
+
     }
 }
