@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SkillNetworkMVC.Extentions;
 using SkillNetworkMVC.Models.Users;
 using SkillNetworkMVC.ViewModels.Account;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SkillNetworkMVC.Controllers.Account
@@ -28,6 +31,57 @@ namespace SkillNetworkMVC.Controllers.Account
             return View("Home/Login");
         }
 
+        [Authorize]
+        [Route("MyPage")]
+        [HttpGet]
+        public IActionResult MyPage()
+        {
+            var user = User;
+
+            var result = _userManager.GetUserAsync(user);
+
+            return View("User", new UserViewModel(result.Result));
+        }
+
+        [Authorize]
+        [Route("Update")]
+        [HttpPost]
+        public async Task<IActionResult> Update(UserEditViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(model.UserId);
+
+                user.Convert(model);
+
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("MyPage", "AccountManager");
+                }
+                else
+                {
+                    return RedirectToAction("Edit", "AccountManager");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "Некорректные данные");
+                return View("Edit", model);
+            }
+        }
+
+        [Route("UserList")]
+        [HttpPost]
+        public IActionResult UserList()
+        {
+            var model = new SearchViewModel
+            {
+                UserList = _userManager.Users.ToList()
+            };
+            return View("UserList", model);
+        }
+
         [HttpGet]
         public IActionResult Login(string returnUrl = null)
         {
@@ -47,14 +101,7 @@ namespace SkillNetworkMVC.Controllers.Account
                 var result = await _signInManager.PasswordSignInAsync(user.Email, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
-                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                    {
-                        return Redirect(model.ReturnUrl);
-                    }
-                    else
-                    {
-                        return RedirectToAction("Index", "Home");
-                    }
+                    return RedirectToAction("MyPage", "AccountManager");
                 }
                 else
                 {
@@ -72,6 +119,5 @@ namespace SkillNetworkMVC.Controllers.Account
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
-
     }
 }

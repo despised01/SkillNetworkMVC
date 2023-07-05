@@ -26,6 +26,7 @@ namespace SkillNetworkMVC.Controllers
             return View(new MainViewModel());
         }
 
+        [Route("[action]")]
         public IActionResult Privacy()
         {
             return View();
